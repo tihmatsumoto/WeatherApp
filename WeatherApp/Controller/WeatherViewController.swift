@@ -3,7 +3,7 @@ import UIKit
 class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManagerDelegate {
     
 //MARK: - Variables
-    let locationButton = UIButton()
+    var locationButton = UIButton()
     let searchField = UISearchTextField()
     let actionSheet = UIAlertController()
     
@@ -24,6 +24,7 @@ class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManag
     
     func configureUI() {
         configureSearchBar()
+        configureLocationButton()
     }
     
 //MARK: - ConfigureSearchBar
@@ -35,12 +36,25 @@ class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManag
         searchField.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            searchField.widthAnchor.constraint(equalToConstant: 250),
+            searchField.widthAnchor.constraint(equalToConstant: 280),
             searchField.heightAnchor.constraint(equalToConstant: 50),
-            searchField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            searchField.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -300)
+            searchField.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 30),
+            searchField.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -310)
         ])
     }
+    
+    func configureLocationButton() {
+        view.addSubview(locationButton)
+        let config = UIImage.SymbolConfiguration(textStyle: .largeTitle)
+        locationButton.setImage(UIImage(systemName: "location.circle.fill", withConfiguration: config), for: .normal)
+        locationButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            locationButton.leadingAnchor.constraint(equalTo: searchField.leadingAnchor, constant: -65),
+            locationButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -310)
+        ])
+    }
+
     
 //MARK: - SearchField Delegate related methods
     func searchTyped(_sender: UITextField) {
@@ -79,10 +93,10 @@ class WeatherViewController: UIViewController, UITextFieldDelegate, WeatherManag
     }
     
     func didFailWithError(error: any Error) {
-        let alertController = UIAlertController(title: "Error", message: "Error", preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        DispatchQueue.main.async {
-            self.present(alertController, animated: true, completion: nil)
-        }
+//        let errorAlert = UIAlertController(title: "Error", message: "\(Error.self)", preferredStyle: .alert)
+//        errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+//        DispatchQueue.main.async {
+//            self.present(errorAlert, animated: true, completion: nil)
+//        }
     }
 }
