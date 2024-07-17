@@ -7,15 +7,15 @@
 
 import Foundation
 
-protocol WeatherManagerDelegate {
+protocol WeatherManagerDelegate: NSObject {
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel)
-    func didFailWithError(error: Error)
+    func didFailWithError(error: String)
 }
 
 struct WeatherManager {
     let weatherURL = "https://api.weatherapi.com/v1/current.json?Key=60e52bb659f74de3a0e114844240807"
     
-    var delegate: WeatherManagerDelegate?
+    weak var delegate: WeatherManagerDelegate?
     
     func fetchWeather(cityName: String) {
         let urlString = "\(weatherURL)&q=\(cityName)"
@@ -26,9 +26,22 @@ struct WeatherManager {
         if let url = URL(string: urlString) {
             let session = URLSession(configuration: .default)
             let task = session.dataTask(with: url) {(data, response, error) in
-                if error != nil {
-                    self.delegate?.didFailWithError(error: error!)
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    
+                    if httpResponse.statusCode == 400 {
+                        self.delegate?.didFailWithError(error: "Invalid Location")
+                        return
+                    }
+                    if httpResponse.statusCode != 200 {
+                        self.delegate?.didFailWithError(error: "Critical Error, Check Server")
+                        return
+                    }
+                } else {
+                    
+                    self.delegate?.didFailWithError(error: "Critical Error, Check Response Type")
                     return
+                    
                 }
                 
                 if let safeData = data {
@@ -54,7 +67,7 @@ struct WeatherManager {
             let weather = WeatherModel(conditionId: code, cityName: name, countryName: country, temperature: temp, conditionDescription: condition)
             return weather
         } catch {
-            delegate?.didFailWithError(error: error)
+            delegate?.didFailWithError(error: "Invalid Response")
             return nil
         }
     }

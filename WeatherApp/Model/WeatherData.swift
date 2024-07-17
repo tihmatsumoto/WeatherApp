@@ -28,7 +28,7 @@ struct Condition: Decodable {
 }
 
 enum ApiError: Error {
-    case invalidURL
+    case invalidUrl
     case invalidKey
     case invalidResponse
 }
