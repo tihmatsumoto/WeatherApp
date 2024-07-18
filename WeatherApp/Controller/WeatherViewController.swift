@@ -10,11 +10,11 @@ import UIKit
 class WeatherViewController: UIViewController {
     
     //MARK: - Variables
-    let locationButton = UIButton()
-    let searchField = UISearchTextField()
-    let actionSheet = UIAlertController()
     let stackView = UIStackView()
+    let searchField = UISearchTextField()
+    let locationButton = UIButton()
     let historyTable = UITableView()
+    let actionSheet = UIAlertController()
     
     var locations: [String] = []
     
@@ -35,64 +35,83 @@ class WeatherViewController: UIViewController {
     
     //MARK: - Configure UI
     func configureUI() {
-        configureHeaderView()
+        configureStackView()
         configureSearchBar()
-        configureHistoryTableView()
         configureLocationButton()
+        configureHistoryTableView()
     }
     
-    //MARK: - ConfigureSearchBar
+//MARK: - Configure StackView
+    func configureStackView() {
+        view.addSubview(stackView)
+        stackView.axis = .horizontal
+        stackView.distribution = .equalCentering
+        stackView.spacing = 30
+
+        stackView.addArrangedSubview(locationButton)
+        stackView.addArrangedSubview(searchField)
+        
+        setStackViewConstraints()
+    }
+    
+    func setStackViewConstraints() {
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
+        stackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20).isActive = true
+        stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20).isActive = true
+    }
+    
+//MARK: - Configure SearchBar
     func configureSearchBar() {
         view.addSubview(searchField)
         searchField.placeholder = "Type city"
-        searchField.textColor = .white
-        searchField.backgroundColor = .gray
+        
+        setSearchBarConstraints()
+    }
+    
+    func setSearchBarConstraints() {
         searchField.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            searchField.widthAnchor.constraint(equalToConstant: 250),
+            searchField.widthAnchor.constraint(equalToConstant: 270),
             searchField.heightAnchor.constraint(equalToConstant: 50),
-            searchField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            searchField.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -300)
+            searchField.centerXAnchor.constraint(equalTo: stackView.centerXAnchor, constant: 35),
+            searchField.centerYAnchor.constraint(equalTo: stackView.centerYAnchor, constant: 25)
         ])
     }
     
-    func configureHeaderView() {
-        stackView.axis = .horizontal
-        stackView.alignment = .fill
-        stackView.distribution = .fillProportionally
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(stackView)
-        stackView.addArrangedSubview(searchField)
-        stackView.addArrangedSubview(locationButton)
-    }
-    
-    //MARK: - ConfigureLocationButton
+//MARK: - Configure LocationButton
     func configureLocationButton() {
         view.addSubview(locationButton)
-        let config = UIImage.SymbolConfiguration(pointSize: 50)
-        locationButton.setImage(UIImage(systemName: "location.square.fill", withConfiguration: config), for: .normal)
-        locationButton.translatesAutoresizingMaskIntoConstraints = false
+        let config = UIImage.SymbolConfiguration(pointSize: 40)
+        locationButton.setImage(UIImage(systemName: "location.fill", withConfiguration: config), for: .normal)
         
+        setLocationButtonContraints()
+    }
+    
+    func setLocationButtonContraints() {
+        locationButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            locationButton.trailingAnchor.constraint(equalTo: searchField.leadingAnchor, constant: -30),
-            locationButton.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -300)
+            locationButton.trailingAnchor.constraint(equalTo: searchField.leadingAnchor, constant: -25),
+            locationButton.centerYAnchor.constraint(equalTo: stackView.centerYAnchor,constant: 25)
         ])
     }
     
+//MARK: - Configure HistoryTableView
     func configureHistoryTableView() {
         view.addSubview(historyTable)
-        historyTable.translatesAutoresizingMaskIntoConstraints = false
         historyTable.backgroundColor = .clear
         historyTable.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
+        setHistoryTableViewConstraints()
+    }
+    
+    func setHistoryTableViewConstraints() {
+        historyTable.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            historyTable.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             historyTable.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 20),
-            historyTable.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            historyTable.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            historyTable.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            historyTable.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
         ])
     }
 }
