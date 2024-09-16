@@ -26,9 +26,3 @@ struct Condition: Decodable {
     let code: Int
     let text: String
 }
-
-enum ApiError: Error {
-    case invalidUrl
-    case invalidKey
-    case invalidResponse
-}
