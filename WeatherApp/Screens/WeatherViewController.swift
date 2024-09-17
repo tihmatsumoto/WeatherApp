@@ -6,17 +6,30 @@
 //
 
 import UIKit
+import CoreLocation
 
 class WeatherViewController: UIViewController {
     
+    let currentLocationButton = UIButton()
     let locationTextField = WATextField()
     let alertMessage = UIAlertController()
+    
+    var locationManager = CLLocationManager()
+    
+    var isLocationEntered: Bool {
+        return !locationTextField.text!.isEmpty
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0.33, green: 0.64, blue: 1.00, alpha: 1.00)
         
+        configureCurrentLocationButton()
         configureLocationTextField()
+        
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation()
     }
     
     func createDismissKeyboardTapGesture() {
@@ -34,31 +47,41 @@ class WeatherViewController: UIViewController {
     }
     
     func fetchWeather(location: String) {
+//        guard isLocationEntered else {
+//            showAlert(title: "No location", message: "No location to fetch weather from", preferredStyle: .alert)
+//            return
+//        }
+        
         NetworkManager.shared.fetchWeather(location: location) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(let currentWeather):
-                showAlert(title: "Current weather for \(location)", message: currentWeather.location.name)
+                let description = "Temperature: \(currentWeather.temperature)\n Condition: \(currentWeather.conditionDescription)"
+                showAlert(title: "Current weather for \(currentWeather.cityName), \(currentWeather.countryName)", message: description)
             case .failure(let error):
                 showAlert(title: "Error", message: String(error.rawValue))
             }
         }
     }
     
-    func pushFollowerListVC() {
-        // implement error treatment
-        //        guard isUsernameEntered else {
-        //            presentGFAlert(title: "Empty Username", message: "Please enter a username to search. We need to know who to look for", buttonTitle: "Ok")
-        //            return
-        //        }
+    func configureCurrentLocationButton() {
+        view.addSubview(currentLocationButton)
+        currentLocationButton.setImage(UIImage(systemName: "location.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 36)), for: .normal)
+        currentLocationButton.translatesAutoresizingMaskIntoConstraints = false
         
-        locationTextField.resignFirstResponder()
+        currentLocationButton.addTarget(self, action: #selector(getWeatherForLocation), for: .touchUpInside)
         
-        
-        
-        //        let followerListVC = FollowerListViewController(username: usernameTextField.text!)
-        //        navigationController?.pushViewController(followerListVC, animated: true)
+        NSLayoutConstraint.activate([
+            currentLocationButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 80),
+            currentLocationButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            currentLocationButton.widthAnchor.constraint(equalToConstant: 50),
+            currentLocationButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    @objc func getWeatherForLocation() {
+        locationManager.requestLocation()
     }
     
     func configureLocationTextField() {
@@ -70,8 +93,8 @@ class WeatherViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             locationTextField.topAnchor.constraint(equalTo: view.topAnchor, constant: 80),
-            locationTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
-            locationTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
+            locationTextField.leadingAnchor.constraint(equalTo: currentLocationButton.trailingAnchor, constant: 20),
+            locationTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             locationTextField.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
@@ -81,6 +104,26 @@ extension WeatherViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         fetchWeather(location: locationTextField.text!)
         return true
+    }
+}
+
+extension WeatherViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.last {
+            locationManager.stopUpdatingLocation()
+            let lat = location.coordinate.latitude
+            let lon = location.coordinate.longitude
+            fetchWeather(location: "\(lat),\(lon)")
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
+        print(error)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.requestLocation()
     }
 }
 

@@ -23,6 +23,5 @@ struct Current: Decodable {
 }
 
 struct Condition: Decodable {
-    let code: Int
     let text: String
 }
